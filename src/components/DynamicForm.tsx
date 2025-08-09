@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef } from 'react'
+import React, { useEffect } from 'react'
 import {
   TextField,
   FormControl,
@@ -32,14 +32,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
 }) => {
   const validateField = (field: FormField, value: any): string | null => {
     for (const rule of field.validationRules) {
-      if (!validateRule(rule, value, field.label)) {
+      if (!validateRule(rule, value)) {
         return rule.message
       }
     }
     return null
   }
 
-  const validateRule = (rule: ValidationRule, value: any, fieldLabel: string): boolean => {
+  const validateRule = (rule: ValidationRule, value: any): boolean => {
     switch (rule.type) {
       case 'required':
         return value !== undefined && value !== null && value !== ''
@@ -76,15 +76,11 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
       }
     }
   }
-  const previousDerivedValues = useRef<{ [key: string]: any }>({})
 
   // Calculate derived fields
   useEffect(() => {
     const derivedFields = fields.filter(f => f.isDerived)
-    if (derivedFields.length === 0) return
-
-    const newDerivedValues: { [key: string]: any } = {}
-    let hasChanges = false
+    const newFormData = { ...formData }
 
     derivedFields.forEach(field => {
       if (field.derivedFrom && field.derivedFormula) {
@@ -95,12 +91,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             const birthdate = formData[birthdateFieldId]
             if (birthdate) {
               const age = new Date().getFullYear() - new Date(birthdate).getFullYear()
-              newDerivedValues[field.id] = age
-              
-              // Check if value actually changed
-              if (previousDerivedValues.current[field.id] !== age) {
-                hasChanges = true
-              }
+              newFormData[field.id] = age
             }
           }
           // Add more derivation logic here as needed
@@ -110,7 +101,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
       }
     })
 
-    setFormData(formData)
+    setFormData(newFormData)
   }, [fields, formData, setFormData])
 
   const renderField = (field: FormField) => {
