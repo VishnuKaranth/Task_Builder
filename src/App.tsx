@@ -11,7 +11,7 @@ function App() {
       <AppBar position='static'>
         <Toolbar>
           <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
-            Form Builder for Upilance.ai
+            Form Builder - Upilance.ai
           </Typography>
           <Navigation />
         </Toolbar>
